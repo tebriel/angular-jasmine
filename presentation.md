@@ -149,6 +149,12 @@ browsers = ['PhantomJS'];
 ```
 
 
+## Preprocessors ##
+
+Karma can do some cool preprocessing like analyzing code coverage with Istanbul
+or auto-compile coffeescript before running the tests.
+
+
 ## Debug Mode ##
 
 Let's go look at that real quick.
