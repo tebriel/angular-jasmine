@@ -108,6 +108,8 @@ describe "A Suite of Tests", ->
 
 ## Karma ##
 
+![Lotus](/img/lotus.jpg)
+
 *  Framework Agnostic TestRunner
 *  Allows code testing in multiple browsers
 *  Integrates with PhantomJS (great for background test running)
@@ -136,38 +138,65 @@ browsers = ['PhantomJS'];
 ```
 
 
+
+## Let's talk Angular ##
+
+[![Angular](/img/angular.png)](http://angularjs.org/)
+
+
+
+## Bootstraping your Tests ##
+
+*  Load the module needed
+*  Ask for your dependencies
+*  Spy on your dependencies
+*  Construct your controller
+
+
 ## Loading Modules in Angular.js ##
 
+Load up whatever module you're about to test
 
 ```coffeescript
 describe "Navbar Testing", ->
     beforeEach module("EG.navbar")
 ```
 
+`module()` calls out to angular to pull in the module you want plus any
+dependencies.
 
 
-
-
+## Dependency Injection ##
 
 ```coffeescript
-@ChatHistoryCtrl = ($rootScope, $scope, $filter, socket) ->
-    $scope.templateUrl = 'partials/chathistory.html'
-    $scope.chatTitle = ''
-
-    # Remove the cruft from the username
-    $scope.cleanUsername = (nick) ->
-        return unless nick?
-        return nick.split('@')[0]
-
-    # Wait for root scope to send us the room information
-    $rootScope.$watch 'currentRoom', (newRoom, oldRoom) ->
-        return unless newRoom?
-        $scope.chatTitle = newRoom.title
-        # Request the room's message history
-        socket.emit 'get-history',
-            limit: 100
-            ident: newRoom.ident
+describe 'Timeline Controller', ->
+    beforeEach inject ($rootScope, $controller) ->
+        @scope = $rootScope.$new()
+        @controller = $controller
 ```
+
+This works for any dependency that is available after loading your module(s),
+even ones you've created and registered as a factory.
+
+
+## Mocks with Dependency Injection ##
+
+Inject within beforeEach is a great time to set up some spies.
+
+```coffeescript
+beforeEach inject ($rootScope, $controller) ->
+    @scope = $rootScope.$new()
+    spyOn @scope, '$emit'
+    @controller = $controller
+
+it "Emits 'reposition' whenever the alert is opened", ->
+    controller = @controller 'AlertInfoCtrl', {$scope:@scope}
+    @scope.toggleOpen()
+    expect(@scope.$emit).toHaveBeenCalledWith 'reposition'
+```
+
+Now every time we create a controller with our `@scope` our spy will be hanging
+in the shadows listening for calls to `$emit`
 
 
 ### Partials/Templates ###
