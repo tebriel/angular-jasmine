@@ -138,6 +138,13 @@ browsers = ['PhantomJS'];
 ```
 
 
+## Debug Mode ##
+
+Let's go look at that real quick.
+
+<a href='http://localhost:9876' target='_blank'>DEMO</a>
+
+
 
 ## Let's talk Angular ##
 
@@ -303,6 +310,89 @@ describe "NavbarCtrl", ->
 ```
 
 Now we have control over when the response fires and what the response is.
+
+
+## $log ##
+
+`console.log` is ugly when testing. You have to wade through a whole bunch of
+lines that just muck up your reporter's status. `$log` wraps `console.log` for you
+(and `.error`, `.info`, etc).
+
+
+## $log ##
+
+When using `ngMock` a mock version of `$log` is automatically injected instead
+of the regular one. This is great for a few reasons.
+
+1.  No more mucking up the console where your test runner is
+1.  You can ask `$log` how many and what messages were logged. This can be
+    another test.
+1.  You can actually see what was logged, especially if you want to test that a
+    specific message was logged to a logger.
+
+
+Example:
+
+```coffeescript
+describe "NavbarCtrl", ->
+    beforeEach inject ($controller, $rootScope, $httpBackend, $log) ->
+        @httpBackend = $httpBackend
+        @scope = $rootScope.$new()
+        @log = $log
+        @controller = $controller
+
+    it "Creates a navbar controller", ->
+        expected = {test: true}
+        @httpBackend.expectGET('api/chats')
+            .respond(expected)
+        controller = @controller 'NavbarCtrl', {$scope:@scope}
+        @httpBackend.flush()
+        expect(@scope.currentChats).toEqual expected
+```
+
+
+## $timeout ##
+
+Often we use `window.setTimeout` to postpone a task to run at a later time.
+Angular provides the $timeout service which follows the promise model like that
+used with $http.
+
+Benefits of $timeout:
+
+1.  Provides a `cancel()` method on the returned object
+1.  Will do scope dirty checks after $timeout has returned
+1.  Has its own mock!
+
+
+## ngMock's $timeout ##
+
+**Almost** the same as $timeout, except it adds `flush()`. This is just like
+`$httpBackend.flush()` in that all calls can then be synchronously run without
+needing callbacks or async testing code. 
+
+
+## angular.mock.dump ##
+
+Ever tried to JSON.stringify a scope object? Test runner can't do it.
+
+Consider the following:
+
+```coffeescript
+console.log JSON.stringify @scope
+
+TypeError: JSON.stringify cannot serialize cyclic structures.
+```
+
+Better:
+```coffeescript
+dump @scope
+
+PhantomJS 1.9 (Mac) LOG: """  Scope(00E): {\n    
+  currentChats: {"unread":0}\n    chatsUnread: ""\n  }"""
+```
+
+
+
 
 
 
