@@ -1,147 +1,153 @@
-# endchat #
+# Angular.js + Jasmine #
 
-### Persistent Chat Framework ###
+### Testing the Night Away ###
 
-Created by Philip Thrasher and Chris Moultrie
+Chris Moultrie
 
-Designed by Anne Harper
+[@tebriel](https://twitter.com/tebriel) [GitHub](https://github.com/tebriel)
 
-
-## Purpose ##
-
-*  Persistent Message history across logins
-  *  Ability to gain context from missed conversations
-  *  Ability to remember what was decided previously in a conversation
-*  Exploration of implementation for Velocity
-*  Exploration of [Angular.js](http://angularjs.org) Framework
+[![Endgame](/img/endgame.jpg)](http://www.endgame.com)
 
 
+## Topics ##
 
-## Technologies Used ##
-
-*  **Node.js** (server-side javascript)
-*  **node-xmpp** (xmpp library for node.js)
-*  **Socket.io** (asynchronous real-time communication)
-*  **Sequelize.js** (node.js ORM)
-*  **Express.js** (server-side web framework for node.js)
-*  **CoffeeScript** (language that compiles to javascript)
-*  **AngularJS** (client-side web framework from google)
-*  **jQuery** (client-side helper library)
-*  **Twitter Bootstrap** (css framework from twitter offering base styling to start
-  from)
+*  Basic [Jasmine](http://pivotal.github.io/jasmine/) Overview
+*  [Karma](http://karma-runner.github.io/)
+*  Loading Modules
+*  Dependency Injection
+*  Controller Construction
+*  ngMock
+  *  [$httpBackend](http://docs.angularjs.org/api/ngMock.$httpBackend)
+  *  [$log](http://docs.angularjs.org/api/ngMock.$log)
+  *  [$timeout](http://docs.angularjs.org/api/ngMock.$timeout)
+  *  [dump](http://docs.angularjs.org/api/angular.mock.dump)
 
 
 
-## Server's Role ##
+## Jasmine ##
 
-*  Proxy chat messages from the web browser to a remote chat network.
-*  Proxy chat messages from the remote chat network to the web browser.
-*  Handle opening and maintaining connections to remote chat network for a
-   connected user.
-*  Maintain and fetch information from the remote chat network.
-   *  Buddy list
-   *  Room list
-   *  Who's in which rooms?
-*  Persistently store messages exchanged in chat rooms to a backing data store.
+![Jasmine](/img/jasmine.jpg)
+
+*  BDD Framework (Fits well into TDD as well)
+*  Simple ideas, lots of expandability
+*  Angular's Default Testing Framework
 
 
-### Remote Chat Network ###
+## [B|T]DD ##
 
-*  For endchat we chose XMPP.
-*  XMPP connection manager is written as an "adapter"
-  *  Can be easily swapped out with a connection manager for a different
-     protocol (irc, oscar, etc...)
-  *  Browser facing code gets locked down API to work from.
+*  Used to test as you develop
+*  Commit any sins necessary
+*  Live for the GREEN
 
 
-### Persistent History ###
+### BDD ###
 
-**Benefits**
-
-*  No longer wonder what was going on before you entered the conversation
-*  "Why did we decide that?"
-*  Even though someone is offline, can be notified that they were involved in a
-   conversation
+*  Tells a Story
+*  Test the 'intent' of the code
+*  Avoid having _deep knowledge_ of code being tested
+*  Change to implementation should not affect test
 
 
-### History Storage ###
+### TDD ###
 
-* History stored in postgres db.
-* History captured for rooms only, not with private (1 on 1) chats.
-* Messages de-duped by hash based on message timestamp, author, and message
-  body.
-
-
-### History Presentation ###
-
-The app pre-fills the chat area with the most recent history for the user to
-gain immediate context of what is going on.
-
-The app will fetch more messages as user scrolls to earlier positions in the
-history.
+*  Test functionality on a micro-level
+*  Use deep knowlege to test all code paths
+*  Implementation change typically breaks test
 
 
-
-## Demo ##
-
-Let's take a look at <a href="/#login" target="_blank">endchat</a>
-
-
-
-## Velocity Implementation ##
-
-*  Velocity is expected to have chat with:
-  *  Rooms
-  *  Buddies
-  *  Messages
-
-
-### Reusable Components ###
-
-*  Server to handle web connections to talk to chat server
-*  Web components for talking to server
-*  Web templates for presenting chat data to user
-
-
-### Lessons Learned ###
-
-* XMPP is not a simple protocol.
-* Chat is not as simple as it seems from the outset.
-* CoffeeScript and Angular.js reduce the number of lines of code by an order of
-  magnitude.
-
-
-
-## Angular.js Framework ##
-
-Project was written using Angular.js as the web layer for presenting the user
-interface.
-
-
-### Directives ###
-
-Directives handle code that is written specifically manipulate the DOM.
+## Basic Jasmine Example ##
 
 ```coffeescript
-popoverDirective = ($rootScope) ->
-    restrict: 'E'
-    replace: false 
-    link: (scope, iElement, iAttrs) ->
-        $rootScope.$on 'liUpdate', ->
-            # Wait until after we've rendered the element
-            setTimeout ->
-                $('.user-item', iElement[0]).popover()
-            , 100
+describe "A Suite of Tests", ->
+  beforeEach ->
+    some.setup()
+    @myVar = true
+
+  afterEach ->
+    some.teardown()
+
+  it "Verifies that we did some setup", ->
+    expect(@myVar).toBeTruthy()
 ```
 
 
-### Controllers ###
+## Jasmine Matchers ##
 
-Controllers handle business logic which deal with data to be presented to the
-view.
+*  functions on the object that `expect` returns
+*  object equality: `.toEqual()`
+*  truthiness/falsiness: `.toBeTruthy()`/`.toBeFalsy()`
+*  Array Contains: `.toContain('abc')`
+  *  ['def', 'abc', '123']
+
+*  Fuzzy value matching
+  *  `.toBeGreaterThan()`/ `.toBeLessThan()`
+  *  `.toBeCloseTo()`
+*  `jasmine.Any()`
 
 
-### Chat History Controller Snippet ###
+## Jasmine Spies ##
+
+### Creating ###
+
+*  `spyOn()`
+*  `createSpy()` && `createSpyObj()`
+
+### Using ###
+
+*  `.andCallThrough()`
+*  `.andReturn()`
+*  `.andCallFake()`
+
+
+## (Mostly) Unnecessary in Angular.js ##
+
+*  Mock Clock (`$timeout` in Angular.js)
+*  Async Support (`$httpBackend` solves most of this)
+
+
+
+## Karma ##
+
+*  Framework Agnostic TestRunner
+*  Allows code testing in multiple browsers
+*  Integrates with PhantomJS (great for background test running)
+*  Great for CI Servers (like [Jenkins](http://jenkins-ci.org/) or [Travis](https://travis-ci.org/))
+*  Add a grunt task via [grunt-karma](https://npmjs.org/package/grunt-karma)
+
+
+## Config ##
+
+```javascript
+basePath = '../';
+
+files = [
+    JASMINE,
+    JASMINE_ADAPTER,
+    'static/src/vendor/angular/angular-*.js',
+    'static/js/code.min.js',
+    'static/js/spec.min.js'
+];
+
+autoWatch = true;
+
+reporters = ['progress']
+
+browsers = ['PhantomJS'];
+```
+
+
+## Loading Modules in Angular.js ##
+
+
+```coffeescript
+describe "Navbar Testing", ->
+    beforeEach module("EG.navbar")
+```
+
+
+
+
+
 
 ```coffeescript
 @ChatHistoryCtrl = ($rootScope, $scope, $filter, socket) ->
@@ -183,56 +189,9 @@ view.
 
 
 
-### Benefits of Angular.js ###
-
-*  Testability
-  *  Unit Tests
-  *  End-to-End Tests
-*  Separation of Business Logic and Presentation Layer
-*  Growing Community
-*  Many channels for help
-*  Google is behind the framework, so unlikely to disappear any time soon
-
-
-### Negatives of Angular.js ###
-
-*  Tough learning curve (new way of thinking)
-*  Plugin community is just starting (have to write our own for some things)
-*  Documentation is incomplete/fuzzy in some areas
-*  Porting code from current framework is possible, but with moderate effort
-
-
-### Final Opinion on Framework ###
-
-*  Absolutely the way we should go for V2
-*  Negatives are small compared to the benefits from:
-  *  Testability
-  *  Separation of Concerns
-*  Support on IRC and Mailing list is prompt and very helpful
-
-
-
-## Documentation with Docco ##
-
-*  Comments become documentation with [docco](http://jashkenas.github.io/docco/)
-*  Build task creates documentation automatically
-
-
 ## Demo ##
 
 Let's take a look at the <a href="/docs/app.html" target="_blank">documentation</a>
-
-
-
-## Final Comments ##
-
-*  Many reusable parts
-*  Gained a strong understanding of Angular.js which will help in V2
-*  Things we wanted to do but didn't have enough time:
-   *  Support for @mentions with email notification for offline users.
-   *  Support for showing pasted image links as images inline in the chat.
-   *  File sharing.
-*  All code up on internal github (https://git.endgames.local/cmoultrie/endchat)
 
 
 
