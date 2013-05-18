@@ -71,6 +71,14 @@ describe "A Suite of Tests", ->
 ```
 
 
+## Cool Jasmine Features ##
+
+*  Matchers
+*  Spies
+*  Mock Clock
+*  Async Tests
+
+
 ## Jasmine Matchers ##
 
 *  functions on the object that `expect` returns
@@ -82,7 +90,10 @@ describe "A Suite of Tests", ->
 *  Fuzzy value matching
   *  `.toBeGreaterThan()`/ `.toBeLessThan()`
   *  `.toBeCloseTo()`
-*  `jasmine.Any()`
+*  `jasmine.any()`
+  *  Number
+  *  Object
+  *  Function
 
 
 ## Jasmine Spies ##
@@ -347,7 +358,8 @@ describe "NavbarCtrl", ->
             .respond(expected)
         controller = @controller 'NavbarCtrl', {$scope:@scope}
         @httpBackend.flush()
-        expect(@scope.currentChats).toEqual expected
+        # If we have errors, something was unexpected!
+        expect(@log.error.logs.length).toEqual 0
 ```
 
 
@@ -390,9 +402,6 @@ dump @scope
 PhantomJS 1.9 (Mac) LOG: """  Scope(00E): {\n    
   currentChats: {"unread":0}\n    chatsUnread: ""\n  }"""
 ```
-
-
-
 
 
 
