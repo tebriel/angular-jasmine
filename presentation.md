@@ -57,17 +57,21 @@ Chris Moultrie
 
 ## Basic Jasmine Example ##
 
-```coffeescript
-describe "A Suite of Tests", ->
-  beforeEach ->
-    some.setup()
-    @myVar = true
+```javascript
+describe("A Suite of Tests", function() {
+  beforeEach( function() {
+    some.setup();
+    this.myVar = true;
+  });
 
-  afterEach ->
-    some.teardown()
+  afterEach( function() {
+    some.teardown();
+  });
 
-  it "Verifies that we did some setup", ->
-    expect(@myVar).toBeTruthy()
+  it("Verifies that we did some setup", function() {
+    expect(this.myVar).toBeTruthy();
+  });
+});
 ```
 
 
@@ -182,9 +186,10 @@ It's so simple!
 
 Load up whatever module you're about to test
 
-```coffeescript
-describe "Navbar Testing", ->
-    beforeEach module("EG.navbar")
+```javascript
+describe("Navbar Testing", function() {
+    beforeEach module("EG.navbar");
+});
 ```
 
 `module()` calls out to angular to pull in the module you want plus any
@@ -193,11 +198,13 @@ dependencies.
 
 ## Dependency Injection ##
 
-```coffeescript
-describe 'Timeline Controller', ->
-    beforeEach inject ($rootScope, $controller) ->
-        @scope = $rootScope.$new()
-        @controller = $controller
+```javascript
+describe('Timeline Controller', function() {
+    beforeEach( inject( function($rootScope, $controller) {
+        this.scope = $rootScope.$new()
+        this.controller = $controller;
+    });
+});
 ```
 
 This works for any dependency that is available after loading your module(s),
@@ -213,16 +220,18 @@ even ones you've created and registered as a factory.
 
 Inject within beforeEach is a great time to set up some spies.
 
-```coffeescript
-beforeEach inject ($rootScope, $controller) ->
-    @scope = $rootScope.$new()
-    spyOn @scope, '$emit'
-    @controller = $controller
+```javascript
+beforeEach(inject( function($rootScope, $controller) {
+    this.scope = $rootScope.$new();
+    spyOn(this.scope, '$emit');
+    this.controller = $controller;
+});
 
-it "Emits 'reposition' whenever the alert is opened", ->
-    controller = @controller 'AlertInfoCtrl', {$scope:@scope}
-    @scope.toggleOpen()
-    expect(@scope.$emit).toHaveBeenCalledWith 'reposition'
+it("Emits 'reposition' whenever the alert is opened", function() {
+    var controller = this.controller('AlertInfoCtrl', {$scope:this.scope});
+    this.scope.toggleOpen();
+    expect(this.scope.$emit).toHaveBeenCalledWith('reposition');
+});
 ```
 
 Now every time we create a controller with our `@scope` our spy will be hanging
@@ -231,27 +240,31 @@ in the shadows listening for calls to `$emit`
 
 ## Controller Construction ##
 
-```coffeescript
-NavbarCtrl = ($scope, $http, $log, mapService) ->
-    # Some Logic goes here
-    $scope.scrollMap = (direction) ->
-        mapService.scrollLeft()
+```javascript
+var NavbarCtrl = function($scope, $http, $log, mapService) {
+    // Some Logic goes here
+    $scope.scrollMap = function(direction) {
+        mapService.scrollLeft();
+    }
+});
 
 angular.module('EG.navbar', ['EG.navbar.directives']) 
-    .controller('NavbarCtrl', ['$scope', '$http', '$log', 'mapService', NavbarCtrl])
+    .controller('NavbarCtrl', ['$scope', '$http', '$log', 'mapService', NavbarCtrl]);
 ```
 
-```coffeescript
-beforeEach inject ($rootScope, $controller) ->
-    @scope = $rootScope.$new()
-    @controller = $controller
-    @mapService = jasmine.createSpyObj 'mapService', ['resize', 'scrollLeft', 'scrollRight']
+```javascript
+beforeEach(inject(function($rootScope, $controller) {
+    this.scope = $rootScope.$new();
+    this.controller = $controller;
+    this.mapService = jasmine.createSpyObj('mapService', ['resize', 'scrollLeft', 'scrollRight']);
+});
 
-it "Emits 'reposition' whenever the alert is opened", ->
-    controller = @controller 'NavbarCtrl',
-        {$scope:@scope, mapService:@mapService}
-    @scope.scrollMap('left')
-    expect(@mapService.scrollLeft).toHaveBeenCalled()
+it("Emits 'reposition' whenever the alert is opened", function() {
+    var controller = this.controller('NavbarCtrl',
+        {$scope:this.scope, mapService:this.mapService});
+    this.scope.scrollMap('left');
+    expect(this.mapService.scrollLeft).toHaveBeenCalled();
+});
 ```
 
 
@@ -288,42 +301,49 @@ across your scope to update anyone watching variables in scope
 
 Consider the following Controller:
 
-```coffeescript
-NavbarCtrl = ($scope, $http, $log) ->
-    success = (data, status, headers, config) ->
-        # If we don't have data, bail
-        unless data?.length > 0
-            $log.error "Issue with data", data, status, headers, config
-            return
+```javascript
+var NavbarCtrl = function($scope, $http, $log) {
+    success = function(data, status, headers, config) {
+        // If we don't have data, bail
+        if (data == null) {
+            $log.error("Issue with data", data, status, headers, config);
+            return;
+        }
 
-        # Save the current chats
-        $scope.currentChats = data
+        // Save the current chats
+        $scope.currentChats = data;
+    }
                 
-    # If things go horribly wrong, we should tell someone, but don't ask me,
-    # I'm not in charge here.
-    fail = (data, status, headers, config) ->
-        $log.error "ChatsError", data, status, headers, config
+    // If things go horribly wrong, we should tell someone, but don't ask me,
+    // I'm not in charge here.
+    fail = function(data, status, headers, config) {
+        $log.error("ChatsError", data, status, headers, config);
+    }
 
-    $http.get("api/chats").success(success).error(fail)
+    $http.get("api/chats").success(success).error(fail);
+}
 ```
 
 
 To Test: 
 
-```coffeescript
-describe "NavbarCtrl", ->
-    beforeEach inject ($controller, $rootScope, $httpBackend) ->
-        @httpBackend = $httpBackend
-        @scope = $rootScope.$new()
-        @controller = $controller
+```javascript
+describe("NavbarCtrl", function() {
+    beforeEach(inject(function($controller, $rootScope, $httpBackend) {
+        this.httpBackend = $httpBackend;
+        this.scope = $rootScope.$new();
+        this.controller = $controller;
+    }));
 
-    it "Creates a navbar controller", ->
-        expected = {test: true}
-        @httpBackend.expectGET('api/chats')
-            .respond(expected)
-        controller = @controller 'NavbarCtrl', {$scope:@scope}
-        @httpBackend.flush()
-        expect(@scope.currentChats).toEqual expected
+    it("Creates a navbar controller", function() {
+        var expected = {test: true};
+        this.httpBackend.expectGET('api/chats')
+            .respond(expected);
+        var controller = this.controller('NavbarCtrl', {$scope:this.scope});
+        this.httpBackend.flush();
+        expect(this.scope.currentChats).toEqual(expected);
+    });
+});
 ```
 
 Now we have control over when the response fires and what the response is.
@@ -350,22 +370,25 @@ of the regular one. This is great for a few reasons.
 
 Example:
 
-```coffeescript
-describe "NavbarCtrl", ->
-    beforeEach inject ($controller, $rootScope, $httpBackend, $log) ->
-        @httpBackend = $httpBackend
-        @scope = $rootScope.$new()
-        @log = $log
-        @controller = $controller
+```javascript
+describe("NavbarCtrl", function() {
+    beforeEach(inject(function($controller, $rootScope, $httpBackend, $log) {
+        this.httpBackend = $httpBackend;
+        this.scope = $rootScope.$new();
+        this.log = $log;
+        this.controller = $controller;
+    }));
 
-    it "Creates a navbar controller", ->
-        expected = {test: true}
-        @httpBackend.expectGET('api/chats')
-            .respond(expected)
-        controller = @controller 'NavbarCtrl', {$scope:@scope}
-        @httpBackend.flush()
-        # If we have errors, something was unexpected!
-        expect(@log.error.logs.length).toEqual 0
+    it("Creates a navbar controller", function() {
+        var expected = {test: true};
+        this.httpBackend.expectGET('api/chats')
+            .respond(expected);
+        var controller = this.controller('NavbarCtrl', {$scope:this.scope});
+        this.httpBackend.flush();
+        // If we have errors, something was unexpected!
+        expect(this.log.error.logs.length).toEqual(0);
+    });
+});
 ```
 
 
@@ -395,15 +418,15 @@ Ever tried to JSON.stringify a scope object? Test runner can't do it.
 
 Consider the following:
 
-```coffeescript
-console.log JSON.stringify @scope
+```javascript
+console.log(JSON.stringify(this.scope));
 
 TypeError: JSON.stringify cannot serialize cyclic structures.
 ```
 
 Better:
-```coffeescript
-dump @scope
+```javascript
+dump(this.scope);
 
 PhantomJS 1.9 (Mac) LOG: """  Scope(00E): {\n    
   currentChats: {"unread":0}\n    chatsUnread: ""\n  }"""
