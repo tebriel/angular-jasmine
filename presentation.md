@@ -26,7 +26,7 @@ Chris Moultrie
 
 ## Jasmine ##
 
-![Jasmine](/img/jasmine.jpg)
+[![Jasmine](/img/jasmine.jpg)](http://www.fanpop.com/clubs/disney-princess/images/29762439/title/princess-jasmine-photo)
 
 *  BDD Framework (Fits well into TDD as well)
 *  Simple ideas, lots of expandability
@@ -108,7 +108,7 @@ describe "A Suite of Tests", ->
 
 ## Karma ##
 
-![Lotus](/img/lotus.jpg)
+[![Lotus](/img/lotus.jpg)](http://en.wikipedia.org/wiki/File:Sacred_lotus_Nelumbo_nucifera.jpg)
 
 *  Framework Agnostic TestRunner
 *  Allows code testing in multiple browsers
@@ -155,6 +155,8 @@ browsers = ['PhantomJS'];
 
 ## Loading Modules in Angular.js ##
 
+It's so simple!
+
 Load up whatever module you're about to test
 
 ```coffeescript
@@ -177,6 +179,11 @@ describe 'Timeline Controller', ->
 
 This works for any dependency that is available after loading your module(s),
 even ones you've created and registered as a factory.
+
+
+## Mocks and Spies ##
+
+[![SpyVsSpy](/img/spy.jpg)](http://kurosama-76.deviantart.com/art/SPY-VS-SPY-336695133)
 
 
 ## Mocks with Dependency Injection ##
