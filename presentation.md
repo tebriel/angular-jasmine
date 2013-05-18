@@ -144,7 +144,6 @@ browsers = ['PhantomJS'];
 [![Angular](/img/angular.png)](http://angularjs.org/)
 
 
-
 ## Bootstraping your Tests ##
 
 *  Load the module needed
@@ -206,29 +205,110 @@ Now every time we create a controller with our `@scope` our spy will be hanging
 in the shadows listening for calls to `$emit`
 
 
-### Partials/Templates ###
+## Controller Construction ##
 
-    <div class='menu-section'>
-        <ul class='unstyled buddies' flexheight='-179'>
-            <li ng-repeat="buddy in buddies | orderBy:nickPredicate | filter:{state: '!offline'}"
-                ng-click='clickBuddy(buddy)'
-                class='user-item'
-                data-toggle="popover"
-                data-trigger='hover'
-                data-title='{{buddy.nick}}'
-                data-content='{{buddy.ident}}' >
-                <div class='status {{buddy.state}}'></div>&nbsp;
-                <span class='nickname'>{{buddy.nick}}</span>
-            </li>
-        </ul>
-    </div>
+```coffeescript
+NavbarCtrl = ($scope, $http, $log, mapService) ->
+    # Some Logic goes here
+    $scope.scrollMap = (direction) ->
+        mapService.scrollLeft()
+
+angular.module('EG.navbar', ['EG.navbar.directives']) 
+    .controller('NavbarCtrl', ['$scope', '$http', '$log', 'mapService', NavbarCtrl])
+```
+
+```coffeescript
+beforeEach inject ($rootScope, $controller) ->
+    @scope = $rootScope.$new()
+    @controller = $controller
+    @mapService = jasmine.createSpyObj 'mapService', ['resize', 'scrollLeft', 'scrollRight']
+
+it "Emits 'reposition' whenever the alert is opened", ->
+    controller = @controller 'NavbarCtrl',
+        {$scope:@scope, mapService:@mapService}
+    @scope.scrollMap('left')
+    expect(@mapService.scrollLeft).toHaveBeenCalled()
+```
+
+
+## Angular Magic ##
+
+We only manually provided `$scope` and `mapService`, Angular's DI service filled in
+the rest of the gaps.
+
+Angular will not provide `$scope`, you must provide that yourself, everything
+else that it has, it will provide.
+
+By injecting the `$controller` service you can ask Angular to construct any
+controller it knows about, but using your own spies.
 
 
 
-## Demo ##
+## ngMock Extra Special Objects ##
 
-Let's take a look at the <a href="/docs/app.html" target="_blank">documentation</a>
+*  $httpBackend
+*  $log
+*  $timeout
+*  angular.mock.dump
+
+
+## $httpBackend ##
+
+Testing web calls sucks, so no one does it. Thankfully with Angular's DI
+service and the $http service our async web calls are crazy easy to test.
+
+Another advantage of using the $http service is that Angular is promise aware,
+so it knows when your request is done and will then run a `$digest/$apply`
+across your scope to update anyone watching variables in scope
+
+
+Consider the following Controller:
+
+```coffeescript
+NavbarCtrl = ($scope, $http, $log) ->
+    success = (data, status, headers, config) ->
+        # If we don't have data, bail
+        unless data?.length > 0
+            $log.error "Issue with data", data, status, headers, config
+            return
+
+        # Save the current chats
+        $scope.currentChats = data
+                
+    # If things go horribly wrong, we should tell someone, but don't ask me,
+    # I'm not in charge here.
+    fail = (data, status, headers, config) ->
+        $log.error "ChatsError", data, status, headers, config
+
+    $http.get("api/chats").success(success).error(fail)
+```
+
+
+To Test: 
+
+```coffeescript
+describe "NavbarCtrl", ->
+    beforeEach inject ($controller, $rootScope, $httpBackend) ->
+        @httpBackend = $httpBackend
+        @scope = $rootScope.$new()
+        @controller = $controller
+
+    it "Creates a navbar controller", ->
+        expected = {test: true}
+        @httpBackend.expectGET('api/chats')
+            .respond(expected)
+        controller = @controller 'NavbarCtrl', {$scope:@scope}
+        @httpBackend.flush()
+        expect(@scope.currentChats).toEqual expected
+```
+
+Now we have control over when the response fires and what the response is.
 
 
 
 ### Questions? ###
+
+
+ALL GLORY TO THE HYPNOTOAD
+
+[![All Glory to the Hypnotoad](img/hypnotoad.gif)](http://buffalobeast.com/futurama-still-doesnt-suck/hypnotoad/)
