@@ -188,7 +188,7 @@ Load up whatever module you're about to test
 
 ```javascript
 describe("Navbar Testing", function() {
-    beforeEach module("EG.navbar");
+    beforeEach(module("EG.navbar"));
 });
 ```
 
@@ -201,7 +201,7 @@ dependencies.
 ```javascript
 describe('Timeline Controller', function() {
     beforeEach( inject( function($rootScope, $controller) {
-        this.scope = $rootScope.$new()
+        this.scope = $rootScope.$new();
         this.controller = $controller;
     });
 });
@@ -228,7 +228,8 @@ beforeEach(inject( function($rootScope, $controller) {
 });
 
 it("Emits 'reposition' whenever the alert is opened", function() {
-    var controller = this.controller('AlertInfoCtrl', {$scope:this.scope});
+    var controller = this.controller('AlertInfoCtrl',
+      {$scope:this.scope});
     this.scope.toggleOpen();
     expect(this.scope.$emit).toHaveBeenCalledWith('reposition');
 });
@@ -249,14 +250,16 @@ var NavbarCtrl = function($scope, $http, $log, mapService) {
 });
 
 angular.module('EG.navbar', ['EG.navbar.directives']) 
-    .controller('NavbarCtrl', ['$scope', '$http', '$log', 'mapService', NavbarCtrl]);
+    .controller('NavbarCtrl',
+        ['$scope', '$http', '$log', 'mapService', NavbarCtrl]);
 ```
 
 ```javascript
 beforeEach(inject(function($rootScope, $controller) {
     this.scope = $rootScope.$new();
     this.controller = $controller;
-    this.mapService = jasmine.createSpyObj('mapService', ['resize', 'scrollLeft', 'scrollRight']);
+    this.mapService = jasmine.createSpyObj('mapService',
+      ['resize', 'scrollLeft', 'scrollRight']);
 });
 
 it("Emits 'reposition' whenever the alert is opened", function() {
@@ -306,16 +309,16 @@ var NavbarCtrl = function($scope, $http, $log) {
     success = function(data, status, headers, config) {
         // If we don't have data, bail
         if (data == null) {
-            $log.error("Issue with data", data, status, headers, config);
+            $log.error("Issue with data", data,
+              status, headers, config);
             return;
         }
-
         // Save the current chats
         $scope.currentChats = data;
     }
                 
-    // If things go horribly wrong, we should tell someone, but don't ask me,
-    // I'm not in charge here.
+    // If things go horribly wrong, we should tell someone
+    // but don't ask me, I'm not in charge here.
     fail = function(data, status, headers, config) {
         $log.error("ChatsError", data, status, headers, config);
     }
@@ -339,7 +342,8 @@ describe("NavbarCtrl", function() {
         var expected = {test: true};
         this.httpBackend.expectGET('api/chats')
             .respond(expected);
-        var controller = this.controller('NavbarCtrl', {$scope:this.scope});
+        var controller = this.controller('NavbarCtrl',
+            {$scope:this.scope});
         this.httpBackend.flush();
         expect(this.scope.currentChats).toEqual(expected);
     });
